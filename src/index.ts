@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { Message } from "websocket";
-import { UserManager } from "./store/UserManager";
+import { UserManager } from "./UserManager";
+import { initMessageType, SupportedMessage, UpvoteMessage } from "./message";
 
 var server = require('websocket').server;
 var http = require('http');
@@ -39,7 +40,7 @@ wsServer.on('request', function (request: any) {
         if (message.type === 'utf8') {
             try {
                 messageHandler(JSON.parse(message.utf8Data))
-            } catch(e) {
+            } catch (e) {
 
             }
             // console.log('Received Message: ' + message.utf8Data);
@@ -51,6 +52,6 @@ wsServer.on('request', function (request: any) {
     });
 });
 
-function messageHandler(message: Message) {
-    
+function messageHandler(type: SupportedMessage, message: Message ) {
+
 }
