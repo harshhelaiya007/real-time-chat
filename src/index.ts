@@ -1,28 +1,26 @@
 #!/usr/bin/env node
-var WebSocketServer = require('websocket').server;
+
+import { Message } from "websocket";
+import { UserManager } from "./store/UserManager";
+
+var server = require('websocket').server;
 var http = require('http');
 
-var WebSocketServer = http.createServer(function (request: any, response: any) {
+var serve = http.createServer(function (request: any, response: any) {
     console.log((new Date()) + ' Received request for ' + request.url);
     response.writeHead(404);
     response.end();
 });
-WebSocketServer.listen(8080, function () {
+serve.listen(8080, function () {
     console.log((new Date()) + ' Server is listening on port 8080');
 });
 
-const wsServer = new WebSocketServer({
-    httpServer: WebSocketServer,
-    // You should not use autoAcceptConnections for production
-    // applications, as it defeats all standard cross-origin protection
-    // facilities built into the protocol and the browser.  You should
-    // *always* verify the connection's origin and decide whether or not
-    // to accept it.
+const wsServer = new serve({
+    httpServer: serve,
     autoAcceptConnections: false
 });
 
 function originIsAllowed(origin: string) {
-    // put logic here to detect whether the specified origin is allowed.
     return true;
 }
 
@@ -37,16 +35,22 @@ wsServer.on('request', function (request: any) {
     var connection = request.accept('echo-protocol', request.origin);
     console.log((new Date()) + ' Connection accepted.');
     connection.on('message', function (message: any) {
+        // todo add rate lim
         if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
-            connection.sendUTF(message.utf8Data);
-        }
-        else if (message.type === 'binary') {
-            console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-            connection.sendBytes(message.binaryData);
+            try {
+                messageHandler(JSON.parse(message.utf8Data))
+            } catch(e) {
+
+            }
+            // console.log('Received Message: ' + message.utf8Data);
+            // connection.sendUTF(message.utf8Data);
         }
     });
     connection.on('close', function (reasonCode: any, description: any) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
 });
+
+function messageHandler(message: Message) {
+    
+}
