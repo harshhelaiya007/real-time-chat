@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-
-import { Message } from "websocket";
+import { IncomingMessage, initMessageType, SupportedMessage, UpvoteMessage } from "./message";
+import { inMemoryStore } from "./store/inMemoryStore";
 import { UserManager } from "./UserManager";
-import { initMessageType, SupportedMessage, UpvoteMessage } from "./message";
 
 var server = require('websocket').server;
 var http = require('http');
@@ -12,6 +11,10 @@ var serve = http.createServer(function (request: any, response: any) {
     response.writeHead(404);
     response.end();
 });
+
+const userManager = new UserManager();
+const store = new inMemoryStore();
+
 serve.listen(8080, function () {
     console.log((new Date()) + ' Server is listening on port 8080');
 });
@@ -39,7 +42,7 @@ wsServer.on('request', function (request: any) {
         // todo add rate lim
         if (message.type === 'utf8') {
             try {
-                messageHandler(JSON.parse(message.utf8Data))
+                messageHandler(connection, JSON.parse(message.utf8Data))
             } catch (e) {
 
             }
@@ -52,6 +55,9 @@ wsServer.on('request', function (request: any) {
     });
 });
 
-function messageHandler(type: SupportedMessage, message: Message ) {
-
+function messageHandler(ws: WebSocket, message: IncomingMessage) {
+    if (message.type == SupportedMessage.JoinRoom) {
+        const payload = message.payload
+        // userManager.addUser(payload.name, payload.userId, payload.roomId, ws)
+    }
 }
